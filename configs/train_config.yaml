@@ -1,0 +1,10 @@
+model: yolov8n.pt
+data: configs/data.yaml
+epochs: 50
+imgsz: 640
+batch: 16
+lr0: 0.01
+patience: 20
+augment: true
+project: runs/detect
+name: plate_baseline

@@ -1,0 +1,6 @@
+kagglehub
+ultralytics
+opencv-python
+easyocr
+gradio
+pytest
