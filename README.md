@@ -15,8 +15,9 @@ notebooks/         Notebook train trên Colab (GPU)
 src/
   data/            Script tải & xử lý dataset
   train/           Script train YOLOv8
-  inference/       Pipeline detect + OCR
+  inference/       Pipeline detect + OCR + multi-frame tracking/voting
   app/             Demo app (Gradio/FastAPI)
+  eval/            Script đánh giá độ chính xác (so với ground truth gán tay)
 models/            Trọng số model đã train (không commit)
 tests/             Unit test
 docs/              Tài liệu kiến trúc & kế hoạch
@@ -48,7 +49,10 @@ Script tải dataset [`bomaich/vnlicenseplate`](https://www.kaggle.com/datasets/
 - [x] Train baseline trên Colab — precision 0.997, recall 1.0, mAP50 0.995 (xem `docs/pipeline.md`)
 - [x] Inference pipeline (`src/inference/detect.py` + `ocr.py`), test trên 8 ảnh — đọc đúng biển 7/8 frame
 - [x] Demo app (`src/app/demo.py`, Gradio) — đã test qua API thật, hoạt động đúng
-- [x] Xác nhận logic đọc biển 2 dòng (xe máy) đúng trên ảnh thật + unit test (`tests/test_ocr.py`, chạy `pytest`)
+- [x] Xác nhận logic đọc biển 2 dòng (xe máy) đúng trên ảnh thật
+- [x] Multi-frame tracking + voting (`src/inference/track.py`) — bù lỗi OCR từng frame bằng cách vote đa số qua nhiều frame: per-frame 87.5% đúng → sau voting 100%
+- [x] Evaluation script (`src/eval/evaluate.py`) — exact-match 77.8%, character accuracy 94.6% trên 9 ảnh gán nhãn tay
+- [x] Unit test cho toàn bộ logic thuần (`tests/`, 16 test case, chạy `pytest`)
 
 ## Chạy demo
 
@@ -57,5 +61,17 @@ python src/app/demo.py
 ```
 
 Mở `http://127.0.0.1:7860` trên trình duyệt, upload ảnh xe để xem kết quả phát hiện + đọc biển số.
+
+## Đánh giá độ chính xác
+
+```bash
+python src/eval/evaluate.py
+```
+
+## Chạy tracking + voting trên nhiều frame
+
+```bash
+python src/inference/track.py <thư mục ảnh chứa các frame liên tiếp>
+```
 
 Xem chi tiết lộ trình tại [`docs/roadmap.md`](docs/roadmap.md).

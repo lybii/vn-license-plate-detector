@@ -43,6 +43,17 @@ Gồm 2 module:
 
 Giao diện web đơn giản bằng Gradio để upload ảnh và xem kết quả (ảnh có vẽ bbox + text nhận diện). Có thể bổ sung thêm FastAPI nếu cần expose REST API (`POST /detect`) cho mục đích tích hợp.
 
+### 5. Multi-frame tracking & voting — `src/inference/track.py`
+
+Khi input là chuỗi frame liên tiếp (video/clip camera) thay vì 1 ảnh đơn lẻ, mỗi frame OCR độc lập có thể đọc sai khác nhau (mất 1 ký tự, nhầm ký tự). Module này:
+- Ghép các detection cùng 1 biển số qua nhiều frame bằng IoU (`iou()`), theo kiểu tracker đơn giản (không dùng thuật toán tracking phức tạp như Kalman/Hungarian vì bài toán chỉ cần "đủ tốt" cho demo).
+- Với mỗi track, "vote" ra 1 chuỗi text đồng thuận (`vote_text()`): chọn độ dài phổ biến nhất trong các lần đọc, rồi vote ký tự theo từng vị trí — giúp loại bỏ lỗi đọc lẻ tẻ ở từng frame riêng.
+- Kết quả thực nghiệm trên 8 frame test: 7/8 frame đọc đúng riêng lẻ, nhưng **voted text đạt đúng 100%** (bù được frame bị thiếu ký tự). Xem chi tiết `docs/pipeline.md`.
+
+### 6. Evaluation — `src/eval/evaluate.py`
+
+Đo độ chính xác pipeline detect+OCR so với ground truth gán nhãn thủ công (`data/eval/ground_truth.json`, gồm bbox + text đúng cho từng ảnh). Match detection với ground truth bbox bằng IoU (không chọn theo confidence cao nhất) vì một số ảnh có nhiều biển số/false-positive — chọn theo confidence sẽ dễ so sánh nhầm biển. Báo cáo exact-match accuracy và character-level accuracy.
+
 ## Lựa chọn công nghệ và lý do
 
 | Thành phần | Lựa chọn | Vì sao |

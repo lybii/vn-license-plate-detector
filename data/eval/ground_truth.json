@@ -1,0 +1,11 @@
+[
+  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_10.jpg", "bbox": [769, 333, 1108, 576], "text": "51A19222"},
+  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_11.jpg", "bbox": [744, 329, 1090, 579], "text": "51A19222"},
+  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_12.jpg", "bbox": [746, 338, 1100, 591], "text": "51A19222"},
+  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_13.jpg", "bbox": [743, 338, 1102, 592], "text": "51A19222"},
+  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_14.jpg", "bbox": [707, 330, 1082, 591], "text": "51A19222"},
+  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_15.jpg", "bbox": [641, 342, 1139, 663], "text": "51A19222"},
+  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_16.jpg", "bbox": [645, 324, 1152, 652], "text": "51A19222"},
+  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_17.jpg", "bbox": [638, 337, 1144, 661], "text": "51A19222"},
+  {"image": "data/raw/vnlicenseplate/train/images/clip18_new_14.jpg", "bbox": [0, 447, 287, 744], "text": "48H116326"}
+]

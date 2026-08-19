@@ -121,3 +121,34 @@ Tập `test` (8 ảnh) chỉ có 1 xe/biển 1 dòng, nên logic ghép dòng cho
 | `9.jpg` | `2-D1` / `60.97` (ảnh bị cắt lề trái) | `2D15097` | Thứ tự dòng đúng; sai 1 ký tự (`6`→`5`) |
 
 **Kết luận**: logic gom nhóm theo hàng + sort theo x (viết ở `order_segments()` trong `src/inference/ocr.py`) hoạt động đúng cho cả biển 1 dòng và 2 dòng — lỗi còn lại chỉ là nhận diện sai ký tự đơn lẻ của EasyOCR (giới hạn của model OCR, không phải bug logic). Có unit test cho hàm này ở `tests/test_ocr.py`.
+
+## Multi-frame tracking & voting (2026-08-19)
+
+Vì lỗi OCR còn lại chủ yếu là sai/mất 1 ký tự đơn lẻ ở từng frame riêng lẻ, và input thực tế thường là video (nhiều frame liên tiếp của cùng 1 xe) chứ không chỉ 1 ảnh, mình viết thêm `src/inference/track.py` để tận dụng thông tin từ nhiều frame:
+
+1. Ghép detection cùng 1 biển số qua các frame bằng IoU giữa bbox frame trước/sau (`iou()`).
+2. Với mỗi track, vote ra text đồng thuận theo từng vị trí ký tự (`vote_text()`) — dùng độ dài phổ biến nhất trong các lần đọc để loại các lần đọc thiếu ký tự, rồi vote ký tự đa số ở từng vị trí.
+
+**Kết quả trên 8 frame test** (chạy `python src/inference/track.py <thư mục ảnh>`):
+
+| | Per-frame (riêng lẻ) | Sau voting |
+|---|---|---|
+| Track biển chính | 7/8 frame đúng (87.5%) | **8/8 — voted text = `51A19222` (100%)** |
+| Track phụ (sticker Toyota) | chuỗi rác/rỗng ở các frame | vẫn ra chuỗi rác (`TOTOTATAVOKA`) — càng xác nhận đây không phải biển thật |
+
+Voting giúp bù được frame bị OCR đọc thiếu ký tự (frame 17: `51A9222` — thiếu 1 chữ số) bằng cách kết hợp thông tin từ các frame còn lại, mà không cần model OCR tốt hơn. Có unit test cho `iou()`, `vote_text()`, `track_and_vote()` ở `tests/test_track.py`.
+
+## Evaluation script (2026-08-19)
+
+`src/eval/evaluate.py` đo độ chính xác pipeline (detect + OCR) trên tập ảnh đã gán nhãn thủ công (`data/eval/ground_truth.json`, hiện có 9 ảnh: 8 frame biển 1 dòng + 1 ảnh biển 2 dòng, gán nhãn dựa trên xác minh trực quan ở các bước trên).
+
+**Lưu ý quan trọng đã phát hiện khi viết script**: ảnh `clip18_new_14.jpg` có 3 biển số/bbox khác nhau trong cùng 1 ảnh — nếu chọn detection theo confidence cao nhất để so khớp với ground truth sẽ **chọn nhầm biển khác**, cho kết quả sai lệch hoàn toàn dù pipeline hoạt động đúng. Đã sửa: match detection với ground truth bằng IoU giữa bbox, không dùng confidence.
+
+**Kết quả** (chạy `python src/eval/evaluate.py`):
+
+| Metric | Giá trị |
+|---|---|
+| Exact-match accuracy | 7/9 = 77.8% |
+| Mean character accuracy | 94.6% |
+
+2 trường hợp sai đều là lỗi OCR đọc thiếu/nhầm 1 ký tự (không phải lỗi detect hay lỗi logic ghép dòng) — khớp với phân tích ở các mục trên. Ground truth hiện còn nhỏ (9 ảnh, gán nhãn thủ công); có thể mở rộng dần khi có thêm ảnh xác minh được.

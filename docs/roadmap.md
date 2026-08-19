@@ -6,7 +6,7 @@
 - [x] Chốt 1 dataset cụ thể, ghi rõ nguồn/link/license vào `docs/dataset.md` — đã chọn `bomaich/vnlicenseplate`
 - [x] Viết `src/data/download.py` để tải dataset về `data/raw/`
 - [x] Chạy `download.py`, kiểm tra trực quan vài ảnh + annotation để xác nhận format đúng như mô tả — đúng format, train 381 / valid 109 / test 8 ảnh
-- [ ] Viết `data.yaml` trỏ tới split train/valid/test sẵn có trong `data/raw/vnlicenseplate/` (không cần convert vì annotation đã ở YOLO format)
+- [x] Viết `data.yaml` trỏ tới split train/valid/test sẵn có trong `data/raw/vnlicenseplate/` (không cần convert vì annotation đã ở YOLO format) — xem `configs/data.yaml`
 
 ## Giai đoạn 2 — Huấn luyện baseline
 
@@ -40,5 +40,6 @@
 ## Giai đoạn 6 (mở rộng, không bắt buộc)
 
 - [ ] Export model sang ONNX để tăng tốc inference
-- [ ] Thử nghiệm chạy real-time trên video/webcam
-- [x] Viết unit test cơ bản cho `src/inference/` (`tests/test_ocr.py` — test logic `order_segments()`, 4 test case, chạy bằng `pytest`)
+- [x] Multi-frame tracking + voting (`src/inference/track.py`) — ghép detection qua các frame bằng IoU, vote consensus text theo ký tự; thực nghiệm trên 8 frame test: per-frame 87.5% đúng → sau voting 100%. Xem `docs/pipeline.md`
+- [x] Evaluation script (`src/eval/evaluate.py` + `data/eval/ground_truth.json`) — đo exact-match accuracy (7/9 = 77.8%) và character accuracy (94.6%) trên 9 ảnh gán nhãn thủ công; phát hiện & sửa 1 bug matching (chọn theo IoU thay vì confidence) khi ảnh có nhiều biển số
+- [x] Viết unit test cơ bản cho `src/inference/` và `src/eval/` (`tests/test_ocr.py`, `tests/test_track.py`, `tests/test_evaluate.py` — 16 test case, chạy bằng `pytest`)
