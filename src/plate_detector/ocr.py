@@ -4,6 +4,8 @@ from pathlib import Path
 import cv2
 import easyocr
 
+from plate_detector.preprocess import preprocess_plate
+
 _reader = None
 _INVALID_CHARS = re.compile(r"[^A-Z0-9]")
 
@@ -56,6 +58,7 @@ def order_segments(segments: list[dict]) -> str:
 
 def read_plate_text(plate_crop) -> str:
     gray = cv2.cvtColor(plate_crop, cv2.COLOR_BGR2GRAY)
+    gray = preprocess_plate(gray)
     results = _get_reader().readtext(gray)
 
     segments = []

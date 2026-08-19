@@ -55,7 +55,9 @@ Script tải dataset [`bomaich/vnlicenseplate`](https://www.kaggle.com/datasets/
 - [x] Xác nhận logic đọc biển 2 dòng (xe máy) đúng trên ảnh thật
 - [x] Multi-frame tracking + voting (`src/plate_detector/track.py`) — bù lỗi OCR từng frame bằng cách vote đa số qua nhiều frame: per-frame 87.5% đúng → sau voting 100%
 - [x] Evaluation script (`src/eval/evaluate.py`) — exact-match 77.8%, character accuracy 94.6% trên 9 ảnh gán nhãn tay
-- [x] Unit test cho toàn bộ logic thuần (`tests/`, 16 test case, chạy `pytest`)
+- [x] Unit test cho toàn bộ logic thuần (`tests/`, 22 test case, chạy `pytest`)
+- [x] Đóng gói `plate_detector` thành package pip-installable + `PlateReader` facade, làm lại demo UI bằng `gr.Blocks`
+- [x] Classical image processing (`src/plate_detector/preprocess.py`: CLAHE, deskew, Otsu binarize) — đo thực nghiệm, quyết định không dùng binarize mặc định vì làm giảm accuracy với EasyOCR (xem `docs/pipeline.md`)
 
 ## Chạy demo
 

@@ -34,6 +34,7 @@ flowchart TB
     subgraph Model["Model layer"]
         DET["detect.py<br/>YOLOv8 wrapper"]
         OCR["ocr.py<br/>EasyOCR + order_segments()"]
+        PRE["preprocess.py<br/>CLAHE + deskew + binarize"]
         TRKLOGIC["track.py<br/>iou() + vote_text()"]
     end
 
@@ -43,6 +44,7 @@ flowchart TB
     TRK --> TRKLOGIC
     PIPE --> DET
     PIPE --> OCR
+    OCR --> PRE
 ```
 
 **Vì sao đóng gói thành package thay vì để rời từng file**: ban đầu `demo.py`, `evaluate.py`, và phần `__main__` của `ocr.py`/`track.py` mỗi nơi tự `sys.path.insert(...)` để import chéo module ở thư mục khác — dễ vỡ khi đổi working directory, không phải cách Python project chuyên nghiệp tổ chức. Thêm `pyproject.toml` ở root và cài `pip install -e .` giúp mọi nơi import tuyệt đối `from plate_detector.xxx import yyy`, không cần path hack. Đồng thời logic "detect rồi OCR từng bbox" (từng bị lặp lại y hệt ở 3 file) được gom vào 1 class `PlateReader` duy nhất trong `pipeline.py`.
@@ -67,7 +69,8 @@ Fine-tune model YOLOv8 pretrained (Ultralytics) trên dataset biển số VN, hu
 
 Package pip-installable (`pip install -e .`), gồm:
 - `detect.py`: load `models/best.pt`, chạy detection trên ảnh, trả về danh sách bounding box + confidence. Nhận tham số `conf` override (UI dùng để làm slider điều chỉnh ngưỡng).
-- `ocr.py`: nhận bounding box, crop ảnh, tiền xử lý (resize, chuyển grayscale, khử nghiêng nếu cần), chạy EasyOCR, hậu xử lý chuỗi kết quả (loại ký tự lạ, xử lý biển số 2 dòng phổ biến ở xe máy VN).
+- `preprocess.py`: các kỹ thuật classical image processing (CLAHE, deskew qua `minAreaRect`, Otsu binarize) áp dụng lên ảnh crop trước khi OCR. Xem thực nghiệm đo tác động ở [`docs/pipeline.md`](pipeline.md).
+- `ocr.py`: nhận bounding box, crop ảnh, gọi `preprocess.py`, chạy EasyOCR, hậu xử lý chuỗi kết quả (loại ký tự lạ, xử lý biển số 2 dòng phổ biến ở xe máy VN).
 - `pipeline.py`: class `PlateReader` — facade gọi `detect.py` + `ocr.py` cho từng ảnh (`.read()`), và vẽ kết quả lên ảnh (`.annotate()`). Đây là điểm vào chung cho mọi consumer (demo, eval, track).
 
 ### 4. Demo app — `src/app/`

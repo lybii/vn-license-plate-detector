@@ -50,3 +50,10 @@
 - [x] Thêm `plate_detector/pipeline.py` (class `PlateReader`) gom logic "detect + OCR từng bbox" từng bị lặp lại ở `demo.py`, `evaluate.py`, `track.py`
 - [x] Xác nhận refactor không đổi hành vi: 16/16 test vẫn pass, `evaluate.py` vẫn ra đúng kết quả cũ (7/9 exact match, 94.6% char accuracy)
 - [x] Làm lại `src/app/demo.py` bằng `gr.Blocks`: custom theme, slider chỉnh confidence threshold, ảnh mẫu bấm thử nhanh, kết quả dạng Markdown, accordion giải thích cách hoạt động
+
+## Giai đoạn 8 — Classical image processing (2026-08-19)
+
+- [x] Thêm `src/plate_detector/preprocess.py`: `enhance_contrast()` (CLAHE), `deskew()` (minAreaRect + warpAffine), `binarize()` (Otsu) — có unit test riêng bằng ảnh tổng hợp (`tests/test_preprocess.py`, 6 test case)
+- [x] Tích hợp `preprocess_plate()` (CLAHE + deskew) vào `ocr.py`, thay cho việc chỉ chuyển grayscale
+- [x] Đo thực nghiệm 3 biến thể qua `evaluate.py`: gray-only vs +CLAHE+deskew vs +binarize — phát hiện **binarize làm giảm accuracy** (77.8%→55.6%) do EasyOCR là OCR deep learning, không phải OCR cổ điển; quyết định không dùng binarize mặc định. Xem chi tiết `docs/pipeline.md`
+- [x] Xác nhận không phá vỡ gì: 22/22 test pass sau khi thêm module mới

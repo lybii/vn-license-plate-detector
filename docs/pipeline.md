@@ -42,10 +42,19 @@ Máy local có GPU NVIDIA nhưng bản PyTorch đang cài là bản CPU-only (ch
 - Output: danh sách `{bbox: [x1,y1,x2,y2], confidence: float}` cho mỗi biển số phát hiện được.
 - Áp dụng ngưỡng confidence tối thiểu (VD: 0.4) để lọc bớt kết quả nhiễu, giá trị cụ thể sẽ tinh chỉnh dựa trên kết quả train thực tế.
 
+### `src/plate_detector/preprocess.py`
+
+Các kỹ thuật classical image processing áp dụng lên ảnh crop biển số trước khi đưa vào OCR:
+
+- `enhance_contrast()` — CLAHE (Contrast Limited Adaptive Histogram Equalization), tăng tương phản cục bộ, hữu ích cho ảnh thiếu sáng/loá đèn.
+- `deskew()` — nhị phân hoá tạm (Otsu) để tìm foreground (ký tự), tính góc nghiêng bằng `cv2.minAreaRect`, xoay ảnh về thẳng bằng `cv2.warpAffine`. Bỏ qua nếu góc quá nhỏ (<0.5°, coi như đã thẳng) hoặc quá lớn (>15°, khả năng cao là nhiễu chứ không phải nghiêng thật, vì bbox từ YOLO vốn đã gần thẳng trục).
+- `binarize()` — nhị phân hoá Otsu, có sẵn nhưng **không dùng mặc định** (xem lý do bên dưới).
+- `preprocess_plate()` — pipeline mặc định: `deskew(enhance_contrast(gray))`.
+
 ### `src/plate_detector/ocr.py`
 
 - Nhận ảnh gốc + bbox từ bước trên, crop vùng biển số.
-- Tiền xử lý ảnh crop trước khi đưa vào OCR: resize về kích thước chuẩn, chuyển grayscale, có thể áp dụng threshold/contrast enhancement nếu ảnh mờ.
+- Chuyển grayscale, chạy qua `preprocess_plate()` (CLAHE + deskew).
 - Chạy EasyOCR (`reader.readtext(cropped_image)`).
 - Hậu xử lý chuỗi kết quả:
   - Loại bỏ ký tự không thuộc bảng chữ cái/số hợp lệ trên biển số VN.
@@ -154,3 +163,18 @@ Voting giúp bù được frame bị OCR đọc thiếu ký tự (frame 17: `51A
 | Mean character accuracy | 94.6% |
 
 2 trường hợp sai đều là lỗi OCR đọc thiếu/nhầm 1 ký tự (không phải lỗi detect hay lỗi logic ghép dòng) — khớp với phân tích ở các mục trên. Ground truth hiện còn nhỏ (9 ảnh, gán nhãn thủ công); có thể mở rộng dần khi có thêm ảnh xác minh được.
+
+## Classical image processing — thực nghiệm (2026-08-19)
+
+Thêm `src/plate_detector/preprocess.py` (CLAHE, deskew, Otsu binarize — xem mục 2 ở trên) để tăng chiều sâu xử lý ảnh thay vì chỉ chuyển grayscale. Đo tác động bằng cách chạy `evaluate.py` với 3 biến thể tiền xử lý trên cùng 9 ảnh ground truth:
+
+| Biến thể | Exact-match | Char accuracy |
+|---|---|---|
+| Chỉ grayscale (baseline cũ) | 7/9 = 77.8% | 94.6% |
+| + CLAHE + deskew | 7/9 = 77.8% | 94.6% |
+| + CLAHE + deskew + **binarize** | 5/9 = 55.6% | 91.4% |
+
+**Nhận xét**:
+- CLAHE + deskew không đổi kết quả trên tập eval hiện tại — vì 9 ảnh này vốn đã rõ nét, gần như thẳng trục (không đại diện cho trường hợp ảnh mờ/nghiêng thật). `deskew()` có unit test riêng xác nhận nó *hoạt động đúng* trên ảnh nghiêng tổng hợp (`tests/test_preprocess.py`), chỉ là chưa có ảnh nghiêng thật trong ground truth để thấy tác động rõ trên end-to-end.
+- **Binarize làm giảm accuracy rõ rệt** (77.8% → 55.6%) — quan trọng nhất là phát hiện ra *lý do*: EasyOCR là OCR dựa trên deep learning (không phải OCR cổ điển kiểu Tesseract), nó tận dụng texture/gradient của ảnh xám tốt hơn ảnh nhị phân thuần; nhị phân hoá còn tạo artifact khiến model "thấy" thêm ký tự giả (VD: đọc thành `51A192221` — thừa 1 số so với `51A19222`).
+- **Quyết định**: `preprocess_plate()` mặc định chỉ dùng `enhance_contrast() + deskew()`, **không dùng `binarize()`**. Hàm `binarize()` vẫn giữ lại trong `preprocess.py` (đã test, đúng chức năng) để tham khảo/dùng cho OCR engine khác (VD: Tesseract) nếu sau này đổi.
