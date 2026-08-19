@@ -61,7 +61,7 @@ flowchart TB
 
 Chịu trách nhiệm tải dataset công khai về, chuyển đổi annotation sang định dạng YOLO, và chia tập train/val/test. Chi tiết xem [`docs/dataset.md`](dataset.md).
 
-### 2. Detector (YOLOv8) — `src/train/`, `notebooks/`
+### 2. Detector (YOLOv8) — `notebooks/`
 
 Fine-tune model YOLOv8 pretrained (Ultralytics) trên dataset biển số VN, huấn luyện trên Google Colab (có GPU miễn phí). Output là file trọng số `best.pt` được tải về `models/`. Chi tiết xem [`docs/pipeline.md`](pipeline.md).
 

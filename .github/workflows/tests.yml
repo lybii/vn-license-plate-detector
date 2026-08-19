@@ -18,4 +18,5 @@ jobs:
 
       - run: pip install -r requirements.txt
       - run: pip install -e .
+      - run: ruff check .
       - run: pytest tests/ -v

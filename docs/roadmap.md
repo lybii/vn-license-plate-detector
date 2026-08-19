@@ -65,4 +65,8 @@
 - [x] Pin version cụ thể trong `requirements.txt` (trước đó chỉ ghi tên package, không tái lập được môi trường chính xác)
 - [x] Thêm screenshot demo vào đầu `README.md` (`docs/assets/demo-screenshot.jpg`) + badge Tests/License/Python
 
-Còn lại (chưa làm, ưu tiên thấp hơn): linting (`ruff`), dọn `src/train/` (thư mục rỗng chưa dùng), deploy demo công khai (Hugging Face Spaces), publish `models/best.pt` làm GitHub Release asset.
+- [x] Linting: `ruff` (config trong `pyproject.toml`, chạy trong CI) — code hiện tại sạch, không có vi phạm
+- [x] Dọn `src/train/` (thư mục rỗng chưa dùng, gây hiểu nhầm — train thật sự chạy qua `notebooks/train_colab.ipynb`)
+- [x] Publish `models/best.pt` làm [GitHub Release v0.1.0](https://github.com/lybii/vn-license-plate-detector/releases/tag/v0.1.0) — người khác clone repo có thể tải weights về chạy demo ngay, không cần tự train lại
+
+Còn lại (chưa làm, để sau theo yêu cầu): deploy demo công khai (Hugging Face Spaces).

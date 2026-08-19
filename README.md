@@ -22,8 +22,7 @@ notebooks/         Notebook train trên Colab (GPU)
 pyproject.toml     Đóng gói src/plate_detector thành package pip-installable
 src/
   data/            Script tải & xử lý dataset
-  train/           Script train YOLOv8
-  plate_detector/  Package chính: detect.py, ocr.py, track.py, pipeline.py (PlateReader)
+  plate_detector/  Package chính: detect.py, ocr.py, track.py, preprocess.py, pipeline.py (PlateReader)
   app/             Demo app (Gradio)
   eval/            Script đánh giá độ chính xác (so với ground truth gán tay)
 models/            Trọng số model đã train (không commit)
@@ -66,6 +65,8 @@ Script tải dataset [`bomaich/vnlicenseplate`](https://www.kaggle.com/datasets/
 - [x] Classical image processing (`src/plate_detector/preprocess.py`: CLAHE, deskew, Otsu binarize) — đo thực nghiệm, quyết định không dùng binarize mặc định vì làm giảm accuracy với EasyOCR (xem `docs/pipeline.md`)
 
 ## Chạy demo
+
+Cần có `models/best.pt` — tải từ [GitHub Releases](https://github.com/lybii/vn-license-plate-detector/releases/tag/v0.1.0) (không cần tự train lại), đặt vào `models/best.pt`.
 
 ```bash
 python src/app/demo.py
