@@ -70,3 +70,10 @@
 - [x] Publish `models/best.pt` làm [GitHub Release v0.1.0](https://github.com/lybii/vn-license-plate-detector/releases/tag/v0.1.0) — người khác clone repo có thể tải weights về chạy demo ngay, không cần tự train lại
 
 Còn lại (chưa làm, để sau theo yêu cầu): deploy demo công khai (Hugging Face Spaces).
+
+## Giai đoạn 10 — Mở rộng ground truth cho đánh giá đáng tin hơn (2026-08-19)
+
+- [x] Mở rộng `data/eval/ground_truth.json` từ 9 → **52 ảnh**, quét đa dạng qua `train/` + `valid/` (nhóm theo clip để tránh trùng lặp gần giống nhau), chỉ giữ ảnh detect ra đúng 1 bbox, tự đọc từng ảnh crop thật để gán nhãn (không copy từ prediction OCR)
+- [x] Chạy lại `evaluate.py` trên bộ 52 ảnh — kết quả: **exact-match 17/52 = 32.7%, char accuracy 83.1%** (giảm mạnh so với 77.8%/94.6% trên 9 ảnh cũ)
+- [x] Phân tích lỗi: tập 9 ảnh cũ **thiên lệch nghiêm trọng** (8/9 là frame của cùng 1 biển dễ đọc); số liệu mới cho thấy **OCR (EasyOCR) là điểm yếu chính**, đặc biệt lỗi hệ thống nhầm chữ số `5`↔`6`. Detect (YOLOv8) vẫn đúng 100% trên toàn bộ 52 ảnh. Xem phân tích chi tiết `docs/pipeline.md`
+- [x] Xác nhận không phá vỡ gì: test suite + `ruff` vẫn pass sau khi cập nhật ground truth

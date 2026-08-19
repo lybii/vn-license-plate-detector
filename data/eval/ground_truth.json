@@ -1,11 +1,522 @@
 [
-  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_10.jpg", "bbox": [769, 333, 1108, 576], "text": "51A19222"},
-  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_11.jpg", "bbox": [744, 329, 1090, 579], "text": "51A19222"},
-  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_12.jpg", "bbox": [746, 338, 1100, 591], "text": "51A19222"},
-  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_13.jpg", "bbox": [743, 338, 1102, 592], "text": "51A19222"},
-  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_14.jpg", "bbox": [707, 330, 1082, 591], "text": "51A19222"},
-  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_15.jpg", "bbox": [641, 342, 1139, 663], "text": "51A19222"},
-  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_16.jpg", "bbox": [645, 324, 1152, 652], "text": "51A19222"},
-  {"image": "data/raw/vnlicenseplate/test/images/clip4_new_17.jpg", "bbox": [638, 337, 1144, 661], "text": "51A19222"},
-  {"image": "data/raw/vnlicenseplate/train/images/clip18_new_14.jpg", "bbox": [0, 447, 287, 744], "text": "48H116326"}
+  {
+    "image": "data/raw/vnlicenseplate/test/images/clip4_new_10.jpg",
+    "bbox": [
+      769,
+      333,
+      1108,
+      576
+    ],
+    "text": "51A19222"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/test/images/clip4_new_11.jpg",
+    "bbox": [
+      744,
+      329,
+      1090,
+      579
+    ],
+    "text": "51A19222"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/test/images/clip4_new_12.jpg",
+    "bbox": [
+      746,
+      338,
+      1100,
+      591
+    ],
+    "text": "51A19222"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/test/images/clip4_new_13.jpg",
+    "bbox": [
+      743,
+      338,
+      1102,
+      592
+    ],
+    "text": "51A19222"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/test/images/clip4_new_14.jpg",
+    "bbox": [
+      707,
+      330,
+      1082,
+      591
+    ],
+    "text": "51A19222"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/test/images/clip4_new_15.jpg",
+    "bbox": [
+      641,
+      342,
+      1139,
+      663
+    ],
+    "text": "51A19222"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/test/images/clip4_new_16.jpg",
+    "bbox": [
+      645,
+      324,
+      1152,
+      652
+    ],
+    "text": "51A19222"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/test/images/clip4_new_17.jpg",
+    "bbox": [
+      638,
+      337,
+      1144,
+      661
+    ],
+    "text": "51A19222"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip18_new_14.jpg",
+    "bbox": [
+      0,
+      447,
+      287,
+      744
+    ],
+    "text": "48H116326"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/1.1.PNG",
+    "bbox": [
+      48,
+      9,
+      247,
+      169
+    ],
+    "text": "61T32222"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/1.jpg",
+    "bbox": [
+      270,
+      260,
+      519,
+      444
+    ],
+    "text": "61T32222"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/11.jpg",
+    "bbox": [
+      744,
+      437,
+      1127,
+      727
+    ],
+    "text": "61F102330"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/13.jpg",
+    "bbox": [
+      798,
+      417,
+      1168,
+      699
+    ],
+    "text": "86B137449"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/19.jpg",
+    "bbox": [
+      575,
+      489,
+      1190,
+      655
+    ],
+    "text": "51H04073"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/20.jpg",
+    "bbox": [
+      758,
+      557,
+      1296,
+      708
+    ],
+    "text": "51G68882"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/21.jpg",
+    "bbox": [
+      670,
+      550,
+      1204,
+      692
+    ],
+    "text": "51F70804"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/22.jpg",
+    "bbox": [
+      866,
+      329,
+      1416,
+      564
+    ],
+    "text": "51H32116"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/8.1.jpg",
+    "bbox": [
+      672,
+      529,
+      1213,
+      688
+    ],
+    "text": "51G79984"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/9.1_0.jpg",
+    "bbox": [
+      469,
+      475,
+      835,
+      583
+    ],
+    "text": "51F70804"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/9.2.jpg",
+    "bbox": [
+      390,
+      509,
+      720,
+      583
+    ],
+    "text": "60A55655"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip13_36.jpg",
+    "bbox": [
+      496,
+      218,
+      833,
+      475
+    ],
+    "text": "59Z207413"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip13_39.jpg",
+    "bbox": [
+      498,
+      217,
+      831,
+      473
+    ],
+    "text": "59Z207413"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip13_new_25.jpg",
+    "bbox": [
+      508,
+      301,
+      834,
+      551
+    ],
+    "text": "72C140582"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip16_new_135.jpg",
+    "bbox": [
+      682,
+      503,
+      1233,
+      663
+    ],
+    "text": "51F70804"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip17_45.jpg",
+    "bbox": [
+      682,
+      468,
+      1286,
+      625
+    ],
+    "text": "68A08749"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip17_47.jpg",
+    "bbox": [
+      684,
+      469,
+      1286,
+      625
+    ],
+    "text": "68A08749"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip17_new_0.jpg",
+    "bbox": [
+      684,
+      463,
+      1281,
+      620
+    ],
+    "text": "68A08749"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip17_new_3.jpg",
+    "bbox": [
+      640,
+      515,
+      1333,
+      695
+    ],
+    "text": "68A08749"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/Clip33_new_0.jpg",
+    "bbox": [
+      897,
+      490,
+      1058,
+      560
+    ],
+    "text": "54Z2340"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/Clip33_new_1.jpg",
+    "bbox": [
+      165,
+      676,
+      485,
+      825
+    ],
+    "text": "54Z2340"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/Clip35_new_0.jpg",
+    "bbox": [
+      782,
+      631,
+      1060,
+      711
+    ],
+    "text": "54X8542"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/Clip35_new_3.jpg",
+    "bbox": [
+      641,
+      558,
+      1017,
+      686
+    ],
+    "text": "51H59540"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/Clip36_new_0.jpg",
+    "bbox": [
+      1071,
+      496,
+      1200,
+      542
+    ],
+    "text": "52P2436"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/Clip36_new_13.jpg",
+    "bbox": [
+      92,
+      753,
+      564,
+      906
+    ],
+    "text": "51H25178"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/Clip37_new_0.jpg",
+    "bbox": [
+      623,
+      349,
+      1135,
+      727
+    ],
+    "text": "59U170333"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/Clip37_new_2.jpg",
+    "bbox": [
+      669,
+      387,
+      1209,
+      803
+    ],
+    "text": "59M128264"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/Clip38_new_0.jpg",
+    "bbox": [
+      393,
+      284,
+      1072,
+      807
+    ],
+    "text": "72AC03062"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip4_66.jpg",
+    "bbox": [
+      755,
+      681,
+      1149,
+      792
+    ],
+    "text": "51G97162"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip4_68.jpg",
+    "bbox": [
+      760,
+      680,
+      1149,
+      792
+    ],
+    "text": "51G97162"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip5_40.jpg",
+    "bbox": [
+      468,
+      338,
+      770,
+      418
+    ],
+    "text": "51F20537"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip5_42.jpg",
+    "bbox": [
+      467,
+      359,
+      763,
+      438
+    ],
+    "text": "51F20537"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip6_19.jpg",
+    "bbox": [
+      547,
+      342,
+      779,
+      515
+    ],
+    "text": "59P286759"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip6_21.jpg",
+    "bbox": [
+      545,
+      345,
+      774,
+      516
+    ],
+    "text": "59P286759"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip8_0.jpg",
+    "bbox": [
+      631,
+      481,
+      1122,
+      653
+    ],
+    "text": "51G79984"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/train/images/clip8_1.jpg",
+    "bbox": [
+      639,
+      491,
+      1131,
+      662
+    ],
+    "text": "51G79984"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/valid/images/clip10_new_1.jpg",
+    "bbox": [
+      824,
+      319,
+      1209,
+      616
+    ],
+    "text": "61F102330"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/valid/images/clip10_new_2.jpg",
+    "bbox": [
+      543,
+      373,
+      966,
+      702
+    ],
+    "text": "61F102330"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/valid/images/clip13_new_0.jpg",
+    "bbox": [
+      497,
+      217,
+      831,
+      473
+    ],
+    "text": "59Z207413"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/valid/images/clip13_new_20.jpg",
+    "bbox": [
+      523,
+      252,
+      853,
+      511
+    ],
+    "text": "72C140582"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/valid/images/clip4_new_41.jpg",
+    "bbox": [
+      743,
+      473,
+      1054,
+      711
+    ],
+    "text": "59P286759"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/valid/images/clip8_new_0.jpg",
+    "bbox": [
+      642,
+      607,
+      1176,
+      753
+    ],
+    "text": "51G79984"
+  },
+  {
+    "image": "data/raw/vnlicenseplate/valid/images/clip8_new_2.jpg",
+    "bbox": [
+      700,
+      551,
+      1195,
+      691
+    ],
+    "text": "51G79984"
+  }
 ]

@@ -157,16 +157,38 @@ Voting giúp bù được frame bị OCR đọc thiếu ký tự (frame 17: `51A
 
 **Kết quả** (chạy `python src/eval/evaluate.py`):
 
+**Kết quả ban đầu (9 ảnh, 2026-08-19):**
+
 | Metric | Giá trị |
 |---|---|
 | Exact-match accuracy | 7/9 = 77.8% |
 | Mean character accuracy | 94.6% |
 
-2 trường hợp sai đều là lỗi OCR đọc thiếu/nhầm 1 ký tự (không phải lỗi detect hay lỗi logic ghép dòng) — khớp với phân tích ở các mục trên. Ground truth hiện còn nhỏ (9 ảnh, gán nhãn thủ công); có thể mở rộng dần khi có thêm ảnh xác minh được.
+2 trường hợp sai đều là lỗi OCR đọc thiếu/nhầm 1 ký tự (không phải lỗi detect hay lỗi logic ghép dòng) — khớp với phân tích ở các mục trên.
+
+### Mở rộng ground truth lên 52 ảnh (2026-08-19)
+
+9 ảnh ban đầu **thiên lệch nghiêm trọng**: 8/9 ảnh là frame liên tiếp của cùng 1 xe/biển số dễ đọc (`51A19222`), nên 94.6% char accuracy không phản ánh đúng chất lượng model trên dữ liệu đa dạng. Mở rộng ground truth bằng cách quét toàn bộ `train/` (381 ảnh) và `valid/` (109 ảnh), nhóm theo tiền tố clip (để tránh lấy nhiều frame gần giống nhau của cùng 1 xe), lấy tối đa 1-2 ảnh đại diện mỗi nhóm + toàn bộ ảnh đơn lẻ không thuộc clip nào. Chỉ giữ lại ảnh **detect ra đúng 1 bbox** (tránh lặp lại bug match-nhầm-biển khi ảnh có nhiều biển số), rồi tự đọc từng ảnh crop thật để gán nhãn (không dùng lại prediction của OCR). Kết quả: từ 43 ảnh ứng viên hợp lệ, **đọc được cả 43** → tổng ground truth **52 ảnh** (khoảng 30 xe/biển số khác nhau, còn lại là các cặp trùng biển do lấy 2 frame/clip).
+
+**Kết quả trên 52 ảnh:**
+
+| Metric | Giá trị |
+|---|---|
+| Exact-match accuracy | 17/52 = 32.7% |
+| Mean character accuracy | 83.1% |
+
+**Đây là con số thật, đáng tin hơn nhiều** so với 77.8%/94.6% trước đó — cho thấy model **yếu hơn đáng kể** so với ấn tượng ban đầu khi chỉ test trên 1 biển số dễ. Phân tích lỗi trên 35 ảnh sai:
+
+- **Lỗi phổ biến nhất: OCR nhầm chữ số `5` thành `6`** (xuất hiện lặp lại ở ít nhất 10 ảnh, VD `51G68882`→`61G68882`, `51F20537`→`61F20537`, `51G97162`→`51697162`) — một lỗi nhận diện ký tự hệ thống của EasyOCR trên font chữ biển số VN, không phải lỗi ngẫu nhiên.
+- Nhầm lẫn ký tự khác gặp nhiều: `7↔2`, `G↔6`, `Z↔2`, `4↔E`.
+- 2 ảnh gần như đọc sai hoàn toàn (`Clip36_new_13.jpg`: 0.0 char accuracy, `clip16_new_135.jpg`: 0.125) — cả 2 đều là ảnh mờ/góc xấu, đúng như giới hạn đã dự đoán trước đó khi tập test ban đầu (8/9 ảnh) toàn ảnh rõ nét.
+- Không có lỗi detect (mọi ảnh đều detect đúng bbox biển số) hay lỗi logic ghép dòng — toàn bộ lỗi nằm ở bước nhận diện ký tự của EasyOCR.
+
+**Ý nghĩa**: pipeline detect (YOLOv8) vẫn rất tốt, nhưng **OCR (EasyOCR) là điểm yếu chính** của hệ thống trên dữ liệu đa dạng — đúng như nghi ngờ khi ground truth còn nhỏ. Hướng cải thiện tiềm năng: fine-tune EasyOCR (hoặc thử PaddleOCR) trên chính font biển số VN, hoặc áp dụng multi-frame voting (`track.py`, xem mục trên) khi input là video để giảm ảnh hưởng của các lỗi đọc lẻ tẻ này.
 
 ## Classical image processing — thực nghiệm (2026-08-19)
 
-Thêm `src/plate_detector/preprocess.py` (CLAHE, deskew, Otsu binarize — xem mục 2 ở trên) để tăng chiều sâu xử lý ảnh thay vì chỉ chuyển grayscale. Đo tác động bằng cách chạy `evaluate.py` với 3 biến thể tiền xử lý trên cùng 9 ảnh ground truth:
+Thêm `src/plate_detector/preprocess.py` (CLAHE, deskew, Otsu binarize — xem mục 2 ở trên) để tăng chiều sâu xử lý ảnh thay vì chỉ chuyển grayscale. Đo tác động bằng cách chạy `evaluate.py` với 3 biến thể tiền xử lý trên bộ 9 ảnh ground truth ban đầu (thời điểm đó chưa mở rộng lên 52 ảnh — số tuyệt đối 77.8%/94.6% ở đây đã lạc hậu so với baseline 32.7%/83.1% hiện tại, nhưng **so sánh tương đối giữa 3 biến thể** vẫn còn giá trị tham khảo):
 
 | Biến thể | Exact-match | Char accuracy |
 |---|---|---|
