@@ -15,9 +15,9 @@ def _get_model() -> YOLO:
     return _model
 
 
-def detect_plates(image) -> list[dict]:
+def detect_plates(image, conf: float | None = None) -> list[dict]:
     model = _get_model()
-    results = model.predict(image, conf=CONF_THRESHOLD, verbose=False)[0]
+    results = model.predict(image, conf=conf if conf is not None else CONF_THRESHOLD, verbose=False)[0]
 
     detections = []
     for box in results.boxes:

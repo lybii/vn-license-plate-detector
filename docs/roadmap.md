@@ -23,8 +23,8 @@
 
 ## Giai đoạn 4 — Inference & OCR
 
-- [x] Viết `src/inference/detect.py`
-- [x] Viết `src/inference/ocr.py`, xử lý riêng biển 1 dòng và 2 dòng (gom nhóm theo hàng dựa trên toạ độ y, sort theo x trong hàng)
+- [x] Viết `src/plate_detector/detect.py`
+- [x] Viết `src/plate_detector/ocr.py`, xử lý riêng biển 1 dòng và 2 dòng (gom nhóm theo hàng dựa trên toạ độ y, sort theo x trong hàng)
 - [x] Test pipeline detect + OCR trên tập ảnh test (8/8 ảnh) — đọc đúng biển chính 7/8 frame, xem chi tiết `docs/pipeline.md`
 - [ ] (Tùy chọn) Lọc bbox phụ false-positive (confidence thấp, OCR ra chuỗi rác) — chưa cần thiết cho demo, để sau nếu ảnh hưởng trải nghiệm
 
@@ -40,6 +40,13 @@
 ## Giai đoạn 6 (mở rộng, không bắt buộc)
 
 - [ ] Export model sang ONNX để tăng tốc inference
-- [x] Multi-frame tracking + voting (`src/inference/track.py`) — ghép detection qua các frame bằng IoU, vote consensus text theo ký tự; thực nghiệm trên 8 frame test: per-frame 87.5% đúng → sau voting 100%. Xem `docs/pipeline.md`
+- [x] Multi-frame tracking + voting (`src/plate_detector/track.py`) — ghép detection qua các frame bằng IoU, vote consensus text theo ký tự; thực nghiệm trên 8 frame test: per-frame 87.5% đúng → sau voting 100%. Xem `docs/pipeline.md`
 - [x] Evaluation script (`src/eval/evaluate.py` + `data/eval/ground_truth.json`) — đo exact-match accuracy (7/9 = 77.8%) và character accuracy (94.6%) trên 9 ảnh gán nhãn thủ công; phát hiện & sửa 1 bug matching (chọn theo IoU thay vì confidence) khi ảnh có nhiều biển số
-- [x] Viết unit test cơ bản cho `src/inference/` và `src/eval/` (`tests/test_ocr.py`, `tests/test_track.py`, `tests/test_evaluate.py` — 16 test case, chạy bằng `pytest`)
+- [x] Viết unit test cơ bản cho `src/plate_detector/` và `src/eval/` (`tests/test_ocr.py`, `tests/test_track.py`, `tests/test_evaluate.py` — 16 test case, chạy bằng `pytest`)
+
+## Giai đoạn 7 — Nâng cấp kiến trúc code + UI demo (2026-08-19)
+
+- [x] Đóng gói `src/inference/{detect,ocr,track}.py` → `src/plate_detector/` (package pip-installable qua `pyproject.toml`, `pip install -e .`), bỏ toàn bộ `sys.path.insert` hack ở `demo.py`, `evaluate.py`, và các file test
+- [x] Thêm `plate_detector/pipeline.py` (class `PlateReader`) gom logic "detect + OCR từng bbox" từng bị lặp lại ở `demo.py`, `evaluate.py`, `track.py`
+- [x] Xác nhận refactor không đổi hành vi: 16/16 test vẫn pass, `evaluate.py` vẫn ra đúng kết quả cũ (7/9 exact match, 94.6% char accuracy)
+- [x] Làm lại `src/app/demo.py` bằng `gr.Blocks`: custom theme, slider chỉnh confidence threshold, ảnh mẫu bấm thử nhanh, kết quả dạng Markdown, accordion giải thích cách hoạt động

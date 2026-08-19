@@ -1,43 +1,65 @@
-import sys
 from pathlib import Path
 
 import cv2
 import gradio as gr
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "inference"))
+from plate_detector.pipeline import PlateReader
 
-from detect import detect_plates
-from ocr import read_plate
+reader = PlateReader()
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+EXAMPLES_DIR = REPO_ROOT / "data" / "raw" / "vnlicenseplate" / "test" / "images"
+EXAMPLE_PATHS = sorted(EXAMPLES_DIR.glob("*.jpg"))[:4] if EXAMPLES_DIR.exists() else []
 
 
-def process(image):
+def process(image, conf_threshold: float):
+    if image is None:
+        return None, "_Chưa có ảnh đầu vào._"
+
+    reader.conf_threshold = conf_threshold
     bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    detections = detect_plates(bgr)
+    detections = reader.read(bgr)
+    annotated = cv2.cvtColor(reader.annotate(bgr, detections), cv2.COLOR_BGR2RGB)
 
-    for det in detections:
-        det["plate_text"] = read_plate(bgr, det["bbox"])
-        x1, y1, x2, y2 = det["bbox"]
-        cv2.rectangle(bgr, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        label = f"{det['plate_text'] or '?'} ({det['confidence']:.2f})"
-        cv2.putText(bgr, label, (x1, max(y1 - 10, 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-
-    annotated = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
     if detections:
-        summary = "\n".join(
-            f"{d['plate_text'] or '(không đọc được)'} — conf {d['confidence']:.2f}" for d in detections
+        result_md = "\n".join(
+            f"- **`{d['plate_text'] or '(không đọc được)'}`** — confidence {d['confidence']:.0%}"
+            for d in detections
         )
     else:
-        summary = "Không phát hiện biển số."
-    return annotated, summary
+        result_md = "_Không phát hiện biển số nào._"
+    return annotated, result_md
 
 
-demo = gr.Interface(
-    fn=process,
-    inputs=gr.Image(type="numpy", label="Ảnh đầu vào"),
-    outputs=[gr.Image(type="numpy", label="Kết quả"), gr.Textbox(label="Biển số nhận diện")],
-    title="VN License Plate Detector",
-    description="Upload ảnh xe để phát hiện và đọc biển số xe Việt Nam.",
-)
+with gr.Blocks(title="VN License Plate Detector") as demo:
+    gr.Markdown(
+        "# 🚗 VN License Plate Detector\n"
+        "Phát hiện và đọc biển số xe Việt Nam bằng YOLOv8 (fine-tuned) + EasyOCR — hỗ trợ cả biển 1 dòng và 2 dòng."
+    )
+
+    with gr.Row():
+        with gr.Column():
+            input_image = gr.Image(type="numpy", label="Ảnh đầu vào")
+            confidence_slider = gr.Slider(0.1, 0.9, value=0.4, step=0.05, label="Ngưỡng confidence")
+            detect_button = gr.Button("Phát hiện biển số", variant="primary")
+            if EXAMPLE_PATHS:
+                gr.Examples(examples=[[str(p)] for p in EXAMPLE_PATHS], inputs=input_image, label="Ảnh mẫu")
+
+        with gr.Column():
+            output_image = gr.Image(type="numpy", label="Kết quả")
+            output_text = gr.Markdown(label="Biển số nhận diện")
+
+    with gr.Accordion("Cách hoạt động", open=False):
+        gr.Markdown(
+            "1. **YOLOv8** (fine-tuned trên dataset biển số VN) phát hiện vị trí biển số trong ảnh.\n"
+            "2. Vùng biển được cắt ra, đưa qua **EasyOCR** để đọc ký tự.\n"
+            "3. Kết quả OCR được ghép theo hàng (hỗ trợ đúng cả biển 1 dòng và 2 dòng xe máy).\n\n"
+            "Chi tiết kiến trúc & kết quả thực nghiệm: "
+            "[github.com/lybii/vn-license-plate-detector](https://github.com/lybii/vn-license-plate-detector)"
+        )
+
+    detect_button.click(process, inputs=[input_image, confidence_slider], outputs=[output_image, output_text])
+    input_image.change(process, inputs=[input_image, confidence_slider], outputs=[output_image, output_text])
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(theme=gr.themes.Soft(primary_hue="blue"))

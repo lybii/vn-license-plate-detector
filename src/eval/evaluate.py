@@ -1,14 +1,11 @@
 import json
-import sys
 from pathlib import Path
+
+from plate_detector.pipeline import PlateReader
+from plate_detector.track import iou
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GROUND_TRUTH_PATH = REPO_ROOT / "data" / "eval" / "ground_truth.json"
-
-sys.path.insert(0, str(REPO_ROOT / "src" / "inference"))
-from detect import detect_plates
-from ocr import read_plate
-from track import iou
 
 
 def char_accuracy(pred: str, truth: str) -> float:
@@ -20,16 +17,17 @@ def char_accuracy(pred: str, truth: str) -> float:
 
 def evaluate() -> list[dict]:
     ground_truth = json.loads(GROUND_TRUTH_PATH.read_text(encoding="utf-8"))
+    reader = PlateReader()
 
     results = []
     for entry in ground_truth:
         image_path = REPO_ROOT / entry["image"]
-        detections = detect_plates(str(image_path))
+        detections = reader.read(str(image_path))
         # match by IoU against the labeled bbox, not just highest confidence -- some
         # images contain multiple plates/false positives, so confidence alone can
         # pick the wrong one
         best = max(detections, key=lambda d: iou(d["bbox"], entry["bbox"]), default=None)
-        pred = read_plate(str(image_path), best["bbox"]) if best else ""
+        pred = best["plate_text"] if best else ""
 
         results.append(
             {

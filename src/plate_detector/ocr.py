@@ -74,7 +74,7 @@ def read_plate(image, bbox: list[int]) -> str:
 if __name__ == "__main__":
     import sys
 
-    from detect import detect_plates
+    from plate_detector.detect import detect_plates
 
     image_path = sys.argv[1]
     for det in detect_plates(image_path):

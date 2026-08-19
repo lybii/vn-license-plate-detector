@@ -66,20 +66,17 @@ def track_and_vote(frame_detections: list[list[dict]]) -> list[dict]:
 if __name__ == "__main__":
     import sys
 
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from detect import detect_plates
-    from ocr import read_plate
+    from plate_detector.pipeline import PlateReader
 
     frames_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else None
     if frames_dir is None:
         raise SystemExit("Usage: python track.py <thư mục ảnh chứa các frame liên tiếp>")
 
+    reader = PlateReader()
     image_paths = sorted(frames_dir.glob("*.jpg"))
     frame_detections = []
     for path in image_paths:
-        detections = detect_plates(str(path))
-        for det in detections:
-            det["plate_text"] = read_plate(str(path), det["bbox"])
+        detections = reader.read(str(path))
         frame_detections.append(detections)
         print(path.name, detections)
 

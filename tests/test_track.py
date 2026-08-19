@@ -1,9 +1,4 @@
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src" / "inference"))
-
-from track import iou, track_and_vote, vote_text
+from plate_detector.track import iou, track_and_vote, vote_text
 
 
 def test_iou_identical_boxes_is_one():

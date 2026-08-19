@@ -35,14 +35,14 @@ Máy local có GPU NVIDIA nhưng bản PyTorch đang cài là bản CPU-only (ch
 
 ## 2. Inference pipeline (chạy local, không cần GPU)
 
-### `src/inference/detect.py`
+### `src/plate_detector/detect.py`
 
 - Load model: `YOLO("models/best.pt")`.
 - Input: đường dẫn ảnh hoặc ảnh dạng numpy array.
 - Output: danh sách `{bbox: [x1,y1,x2,y2], confidence: float}` cho mỗi biển số phát hiện được.
 - Áp dụng ngưỡng confidence tối thiểu (VD: 0.4) để lọc bớt kết quả nhiễu, giá trị cụ thể sẽ tinh chỉnh dựa trên kết quả train thực tế.
 
-### `src/inference/ocr.py`
+### `src/plate_detector/ocr.py`
 
 - Nhận ảnh gốc + bbox từ bước trên, crop vùng biển số.
 - Tiền xử lý ảnh crop trước khi đưa vào OCR: resize về kích thước chuẩn, chuyển grayscale, có thể áp dụng threshold/contrast enhancement nếu ảnh mờ.
@@ -66,9 +66,11 @@ Máy local có GPU NVIDIA nhưng bản PyTorch đang cài là bản CPU-only (ch
 
 ## 3. Demo app — `src/app/demo.py`
 
-- Dùng **Gradio** làm giao diện chính (ưu tiên vì dựng nhanh, phù hợp quay video/chụp ảnh demo cho portfolio):
-  - Input: upload ảnh hoặc chọn ảnh mẫu có sẵn.
-  - Output: ảnh gốc có vẽ bounding box + text biển số nhận diện được, kèm confidence score.
+- Dùng **Gradio** (`gr.Blocks`, không dùng `gr.Interface` mặc định để chủ động layout/theme) làm giao diện chính:
+  - Input: upload ảnh, slider chỉnh ngưỡng confidence, ảnh mẫu bấm thử nhanh (`gr.Examples`, tự động ẩn nếu chưa tải dataset).
+  - Output: ảnh gốc có vẽ bounding box + text biển số nhận diện được, hiển thị dạng Markdown kèm % confidence.
+  - Accordion "Cách hoạt động" giải thích ngắn pipeline + link GitHub.
+  - Toàn bộ logic detect+OCR gọi qua `PlateReader` (`plate_detector.pipeline`), không tự viết lại.
 - Có thể bổ sung **FastAPI** sau nếu muốn có REST API riêng (`POST /detect`, nhận ảnh trả về JSON) để tích hợp với ứng dụng khác hoặc dùng cho việc test tự động.
 
 ## 4. File cấu hình — `configs/train_config.yaml`
@@ -104,7 +106,7 @@ Trọng số: `models/best.pt` (~6MB, yolov8n).
 
 ## Kết quả test inference + OCR (2026-08-19)
 
-Chạy `src/inference/detect.py` + `src/inference/ocr.py` trên toàn bộ 8 ảnh tập `test` (đều là frame từ cùng 1 clip, cùng 1 xe/biển số):
+Chạy `src/plate_detector/detect.py` + `src/plate_detector/ocr.py` trên toàn bộ 8 ảnh tập `test` (đều là frame từ cùng 1 clip, cùng 1 xe/biển số):
 
 - **Detection**: đúng vị trí biển số chính ở cả 8/8 ảnh, confidence 0.90–0.93.
 - **OCR trên biển chính**: đọc đúng `51A19222` ở 7/8 frame; 1 frame thiếu 1 ký tự do ảnh mờ/góc xấu — chấp nhận được, không phải lỗi logic.
@@ -120,16 +122,16 @@ Tập `test` (8 ảnh) chỉ có 1 xe/biển 1 dòng, nên logic ghép dòng cho
 | `clip18_new_14.jpg` | `48-H1` / `163.26` | `48HT16326` | Thứ tự dòng trên→dưới **đúng**; sai 1 ký tự (`1`→`T`, lỗi nhận diện font, không phải lỗi logic ghép dòng) |
 | `9.jpg` | `2-D1` / `60.97` (ảnh bị cắt lề trái) | `2D15097` | Thứ tự dòng đúng; sai 1 ký tự (`6`→`5`) |
 
-**Kết luận**: logic gom nhóm theo hàng + sort theo x (viết ở `order_segments()` trong `src/inference/ocr.py`) hoạt động đúng cho cả biển 1 dòng và 2 dòng — lỗi còn lại chỉ là nhận diện sai ký tự đơn lẻ của EasyOCR (giới hạn của model OCR, không phải bug logic). Có unit test cho hàm này ở `tests/test_ocr.py`.
+**Kết luận**: logic gom nhóm theo hàng + sort theo x (viết ở `order_segments()` trong `src/plate_detector/ocr.py`) hoạt động đúng cho cả biển 1 dòng và 2 dòng — lỗi còn lại chỉ là nhận diện sai ký tự đơn lẻ của EasyOCR (giới hạn của model OCR, không phải bug logic). Có unit test cho hàm này ở `tests/test_ocr.py`.
 
 ## Multi-frame tracking & voting (2026-08-19)
 
-Vì lỗi OCR còn lại chủ yếu là sai/mất 1 ký tự đơn lẻ ở từng frame riêng lẻ, và input thực tế thường là video (nhiều frame liên tiếp của cùng 1 xe) chứ không chỉ 1 ảnh, mình viết thêm `src/inference/track.py` để tận dụng thông tin từ nhiều frame:
+Vì lỗi OCR còn lại chủ yếu là sai/mất 1 ký tự đơn lẻ ở từng frame riêng lẻ, và input thực tế thường là video (nhiều frame liên tiếp của cùng 1 xe) chứ không chỉ 1 ảnh, mình viết thêm `src/plate_detector/track.py` để tận dụng thông tin từ nhiều frame:
 
 1. Ghép detection cùng 1 biển số qua các frame bằng IoU giữa bbox frame trước/sau (`iou()`).
 2. Với mỗi track, vote ra text đồng thuận theo từng vị trí ký tự (`vote_text()`) — dùng độ dài phổ biến nhất trong các lần đọc để loại các lần đọc thiếu ký tự, rồi vote ký tự đa số ở từng vị trí.
 
-**Kết quả trên 8 frame test** (chạy `python src/inference/track.py <thư mục ảnh>`):
+**Kết quả trên 8 frame test** (chạy `python src/plate_detector/track.py <thư mục ảnh>`):
 
 | | Per-frame (riêng lẻ) | Sau voting |
 |---|---|---|

@@ -17,6 +17,36 @@ flowchart LR
     H --> I[Demo app: Gradio / FastAPI]
 ```
 
+## Sơ đồ layer trong code (`src/plate_detector/`)
+
+Toàn bộ logic detect + OCR được đóng gói thành 1 package Python pip-installable (`plate_detector`), có 2 layer rõ ràng — các "consumer" (demo app, eval script, script tracking) không tự lặp lại logic detect+OCR mà đều gọi qua 1 facade chung:
+
+```mermaid
+flowchart TB
+    subgraph Consumers["Consumers (script độc lập)"]
+        APP["src/app/demo.py<br/>Gradio UI"]
+        EVAL["src/eval/evaluate.py<br/>đo accuracy"]
+        TRK["src/plate_detector/track.py<br/>chạy CLI multi-frame"]
+    end
+    subgraph App["Application layer"]
+        PIPE["pipeline.py: PlateReader<br/>.read() = detect + OCR<br/>.annotate() = vẽ bbox"]
+    end
+    subgraph Model["Model layer"]
+        DET["detect.py<br/>YOLOv8 wrapper"]
+        OCR["ocr.py<br/>EasyOCR + order_segments()"]
+        TRKLOGIC["track.py<br/>iou() + vote_text()"]
+    end
+
+    APP --> PIPE
+    EVAL --> PIPE
+    TRK --> PIPE
+    TRK --> TRKLOGIC
+    PIPE --> DET
+    PIPE --> OCR
+```
+
+**Vì sao đóng gói thành package thay vì để rời từng file**: ban đầu `demo.py`, `evaluate.py`, và phần `__main__` của `ocr.py`/`track.py` mỗi nơi tự `sys.path.insert(...)` để import chéo module ở thư mục khác — dễ vỡ khi đổi working directory, không phải cách Python project chuyên nghiệp tổ chức. Thêm `pyproject.toml` ở root và cài `pip install -e .` giúp mọi nơi import tuyệt đối `from plate_detector.xxx import yyy`, không cần path hack. Đồng thời logic "detect rồi OCR từng bbox" (từng bị lặp lại y hệt ở 3 file) được gom vào 1 class `PlateReader` duy nhất trong `pipeline.py`.
+
 ## Vì sao tách 2 giai đoạn (detect rồi mới OCR) thay vì end-to-end 1 model
 
 - Chạy OCR trực tiếp trên cả bức ảnh gốc sẽ rất chậm và dễ đọc nhầm chữ ở các vùng không liên quan (biển quảng cáo, chữ trên xe...).
@@ -33,17 +63,18 @@ Chịu trách nhiệm tải dataset công khai về, chuyển đổi annotation 
 
 Fine-tune model YOLOv8 pretrained (Ultralytics) trên dataset biển số VN, huấn luyện trên Google Colab (có GPU miễn phí). Output là file trọng số `best.pt` được tải về `models/`. Chi tiết xem [`docs/pipeline.md`](pipeline.md).
 
-### 3. Inference pipeline — `src/inference/`
+### 3. Inference pipeline — `src/plate_detector/`
 
-Gồm 2 module:
-- `detect.py`: load `models/best.pt`, chạy detection trên ảnh, trả về danh sách bounding box + confidence.
+Package pip-installable (`pip install -e .`), gồm:
+- `detect.py`: load `models/best.pt`, chạy detection trên ảnh, trả về danh sách bounding box + confidence. Nhận tham số `conf` override (UI dùng để làm slider điều chỉnh ngưỡng).
 - `ocr.py`: nhận bounding box, crop ảnh, tiền xử lý (resize, chuyển grayscale, khử nghiêng nếu cần), chạy EasyOCR, hậu xử lý chuỗi kết quả (loại ký tự lạ, xử lý biển số 2 dòng phổ biến ở xe máy VN).
+- `pipeline.py`: class `PlateReader` — facade gọi `detect.py` + `ocr.py` cho từng ảnh (`.read()`), và vẽ kết quả lên ảnh (`.annotate()`). Đây là điểm vào chung cho mọi consumer (demo, eval, track).
 
 ### 4. Demo app — `src/app/`
 
-Giao diện web đơn giản bằng Gradio để upload ảnh và xem kết quả (ảnh có vẽ bbox + text nhận diện). Có thể bổ sung thêm FastAPI nếu cần expose REST API (`POST /detect`) cho mục đích tích hợp.
+Giao diện Gradio (`gr.Blocks`, custom theme) để upload ảnh và xem kết quả: ảnh vẽ bbox + text nhận diện dạng Markdown, slider chỉnh ngưỡng confidence trực tiếp, ảnh mẫu để bấm thử nhanh, accordion giải thích cách hoạt động. Dùng `PlateReader` từ `plate_detector.pipeline`, không tự lặp lại logic detect+OCR. Có thể bổ sung thêm FastAPI nếu cần expose REST API (`POST /detect`) cho mục đích tích hợp.
 
-### 5. Multi-frame tracking & voting — `src/inference/track.py`
+### 5. Multi-frame tracking & voting — `src/plate_detector/track.py`
 
 Khi input là chuỗi frame liên tiếp (video/clip camera) thay vì 1 ảnh đơn lẻ, mỗi frame OCR độc lập có thể đọc sai khác nhau (mất 1 ký tự, nhầm ký tự). Module này:
 - Ghép các detection cùng 1 biển số qua nhiều frame bằng IoU (`iou()`), theo kiểu tracker đơn giản (không dùng thuật toán tracking phức tạp như Kalman/Hungarian vì bài toán chỉ cần "đủ tốt" cho demo).
@@ -72,9 +103,9 @@ Khi input là chuỗi frame liên tiếp (video/clip camera) thay vì 1 ảnh đ
 
 ## Luồng dữ liệu khi inference (chạy local)
 
-1. `src/inference/detect.py` load `models/best.pt`, nhận ảnh đầu vào, trả về list bbox biển số.
-2. `src/inference/ocr.py` crop từng bbox, tiền xử lý, chạy OCR, hậu xử lý ra chuỗi text.
-3. `src/app/demo.py` gọi pipeline trên và hiển thị kết quả trực quan qua Gradio.
+1. `PlateReader.read()` (`src/plate_detector/pipeline.py`) gọi `detect.py` để lấy list bbox biển số, rồi gọi `ocr.py` để đọc text từng bbox.
+2. `PlateReader.annotate()` vẽ bbox + text lên ảnh.
+3. `src/app/demo.py` gọi `PlateReader` và hiển thị kết quả trực quan qua Gradio. `src/eval/evaluate.py` và `src/plate_detector/track.py` cũng dùng chung `PlateReader` thay vì tự viết lại logic.
 
 ## Ràng buộc hiệu năng (mục tiêu tham khảo, sẽ tinh chỉnh sau khi có kết quả thực tế)
 

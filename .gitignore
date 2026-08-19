@@ -3,6 +3,8 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
+*.egg-info/
+build/
 
 data/raw/
 data/processed/

@@ -1,9 +1,4 @@
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src" / "inference"))
-
-from ocr import order_segments
+from plate_detector.ocr import order_segments
 
 
 def _seg(cx, cy, h, text):
