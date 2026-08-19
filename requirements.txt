@@ -1,6 +1,6 @@
-kagglehub
-ultralytics
-opencv-python
-easyocr
-gradio
-pytest
+kagglehub==1.0.2
+ultralytics==8.4.122
+opencv-python==5.0.0.93
+easyocr==1.7.2
+gradio==6.24.0
+pytest==9.1.1

@@ -1,6 +1,12 @@
 # VN License Plate Detector
 
+[![Tests](https://github.com/lybii/vn-license-plate-detector/actions/workflows/tests.yml/badge.svg)](https://github.com/lybii/vn-license-plate-detector/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Python](https://img.shields.io/badge/python-3.11-blue.svg)
+
 Phát hiện và nhận diện biển số xe Việt Nam: fine-tune YOLOv8 để xác định vị trí biển số, sau đó dùng OCR để đọc nội dung.
+
+![Demo screenshot](docs/assets/demo-screenshot.jpg)
 
 Tài liệu thiết kế chi tiết: [`docs/architecture.md`](docs/architecture.md), [`docs/dataset.md`](docs/dataset.md), [`docs/pipeline.md`](docs/pipeline.md), [`docs/roadmap.md`](docs/roadmap.md).
 
@@ -80,3 +86,7 @@ python src/plate_detector/track.py <thư mục ảnh chứa các frame liên ti�
 ```
 
 Xem chi tiết lộ trình tại [`docs/roadmap.md`](docs/roadmap.md).
+
+## License
+
+Code trong repo này dùng giấy phép [MIT](LICENSE). Dataset ([`bomaich/vnlicenseplate`](https://www.kaggle.com/datasets/bomaich/vnlicenseplate) trên Kaggle) và trọng số model **không** nằm trong giấy phép này — không được commit vào repo và giữ nguyên điều khoản sử dụng gốc của Kaggle.

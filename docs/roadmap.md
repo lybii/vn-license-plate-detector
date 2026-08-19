@@ -57,3 +57,12 @@
 - [x] Tích hợp `preprocess_plate()` (CLAHE + deskew) vào `ocr.py`, thay cho việc chỉ chuyển grayscale
 - [x] Đo thực nghiệm 3 biến thể qua `evaluate.py`: gray-only vs +CLAHE+deskew vs +binarize — phát hiện **binarize làm giảm accuracy** (77.8%→55.6%) do EasyOCR là OCR deep learning, không phải OCR cổ điển; quyết định không dùng binarize mặc định. Xem chi tiết `docs/pipeline.md`
 - [x] Xác nhận không phá vỡ gì: 22/22 test pass sau khi thêm module mới
+
+## Giai đoạn 9 — Chuẩn hoá repo cho chuyên nghiệp (2026-08-19)
+
+- [x] CI: `.github/workflows/tests.yml` — tự động chạy `pytest` trên mỗi push/PR vào `main`
+- [x] `LICENSE` (MIT) — làm rõ dataset/model weights không nằm trong giấy phép này
+- [x] Pin version cụ thể trong `requirements.txt` (trước đó chỉ ghi tên package, không tái lập được môi trường chính xác)
+- [x] Thêm screenshot demo vào đầu `README.md` (`docs/assets/demo-screenshot.jpg`) + badge Tests/License/Python
+
+Còn lại (chưa làm, ưu tiên thấp hơn): linting (`ruff`), dọn `src/train/` (thư mục rỗng chưa dùng), deploy demo công khai (Hugging Face Spaces), publish `models/best.pt` làm GitHub Release asset.
